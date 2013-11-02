@@ -19,13 +19,11 @@ package com.android.datetimepicker.time;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.app.Service;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.os.Vibrator;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.AttributeSet;
@@ -40,10 +38,14 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 
+import com.android.datetimepicker.HapticFeedbackController;
 import com.android.datetimepicker.R;
 
-import java.util.HashMap;
-
+/**
+ * The primary layout to hold the circular picker, and the am/pm buttons. This view well measure
+ * itself to end up as a square. It also handles touches to be passed in to views that need to know
+ * when they'd been touched.
+ */
 public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
     private static final String TAG = "RadialPickerLayout";
 
@@ -60,10 +62,9 @@ public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
     private static final int AM = TimePickerDialog.AM;
     private static final int PM = TimePickerDialog.PM;
 
-    private Vibrator mVibrator;
-    private long mLastVibrate;
     private int mLastValueSelected;
 
+    private HapticFeedbackController mHapticFeedbackController;
     private OnValueSelectedListener mListener;
     private boolean mTimeInitialized;
     private int mCurrentHoursOfDay;
@@ -125,8 +126,6 @@ public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
         // Prepare mapping to snap touchable degrees to selectable degrees.
         preparePrefer30sMap();
 
-        mVibrator = (Vibrator) context.getSystemService(Service.VIBRATOR_SERVICE);
-        mLastVibrate = 0;
         mLastValueSelected = -1;
 
         mInputEnabled = true;
@@ -168,12 +167,14 @@ public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
      * @param initialMinutes
      * @param is24HourMode
      */
-    public void initialize(Context context, int initialHoursOfDay, int initialMinutes,
-            boolean is24HourMode) {
+    public void initialize(Context context, HapticFeedbackController hapticFeedbackController,
+            int initialHoursOfDay, int initialMinutes, boolean is24HourMode) {
         if (mTimeInitialized) {
             Log.e(TAG, "Time has already been initialized.");
             return;
         }
+
+        mHapticFeedbackController = hapticFeedbackController;
         mIs24HourMode = is24HourMode;
         mHideAmPm = mAccessibilityManager.isTouchExplorationEnabled()? true : mIs24HourMode;
 
@@ -217,6 +218,15 @@ public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
 
         mTimeInitialized = true;
     }
+
+    /* package */ void setTheme(Context context, boolean themeDark) {
+        mCircleView.setTheme(context, themeDark);
+        mAmPmCirclesView.setTheme(context, themeDark);
+        mHourRadialTextsView.setTheme(context, themeDark);
+        mMinuteRadialTextsView.setTheme(context, themeDark);
+        mHourRadialSelectorView.setTheme(context, themeDark);
+        mMinuteRadialSelectorView.setTheme(context, themeDark);
+   }
 
     public void setTime(int hours, int minutes) {
         setItem(HOUR_INDEX, hours);
@@ -582,7 +592,7 @@ public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
                 if (mIsTouchingAmOrPm == AM || mIsTouchingAmOrPm == PM) {
                     // If the touch is on AM or PM, set it as "touched" after the TAP_TIMEOUT
                     // in case the user moves their finger quickly.
-                    tryVibrate();
+                    mHapticFeedbackController.tryVibrate();
                     mDownDegrees = -1;
                     mHandler.postDelayed(new Runnable() {
                         @Override
@@ -600,7 +610,7 @@ public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
                     if (mDownDegrees != -1) {
                         // If it's a legal touch, set that number as "selected" after the
                         // TAP_TIMEOUT in case the user moves their finger quickly.
-                        tryVibrate();
+                        mHapticFeedbackController.tryVibrate();
                         mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -655,7 +665,7 @@ public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
                 if (degrees != -1) {
                     value = reselectSelector(degrees, isInnerCircle[0], false, true);
                     if (value != mLastValueSelected) {
-                        tryVibrate();
+                        mHapticFeedbackController.tryVibrate();
                         mLastValueSelected = value;
                         mListener.onValueSelected(getCurrentItemShowing(), value, false);
                     }
@@ -712,21 +722,6 @@ public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
                 break;
         }
         return false;
-    }
-
-    /**
-     * Try to vibrate. To prevent this becoming a single continuous vibration, nothing will
-     * happen if we have vibrated very recently.
-     */
-    public void tryVibrate() {
-        if (mVibrator != null) {
-            long now = SystemClock.uptimeMillis();
-            // We want to try to vibrate each individual tick discretely.
-            if (now - mLastVibrate >= 125) {
-                mVibrator.vibrate(5);
-                mLastVibrate = now;
-            }
-        }
     }
 
     /**
