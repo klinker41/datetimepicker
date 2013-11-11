@@ -548,7 +548,12 @@ public class RadialPickerLayout extends FrameLayout implements OnTouchListener {
             }
             mTransition = new AnimatorSet();
             mTransition.playTogether(anims);
-            mTransition.start();
+
+            try {
+                mTransition.start();
+            } catch (Exception e) {
+
+            }
         } else {
             int hourAlpha = (index == HOUR_INDEX) ? 255 : 0;
             int minuteAlpha = (index == MINUTE_INDEX) ? 255 : 0;
