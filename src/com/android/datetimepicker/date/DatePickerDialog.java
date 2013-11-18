@@ -19,6 +19,7 @@ package com.android.datetimepicker.date;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.format.DateUtils;
@@ -35,9 +36,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.datetimepicker.HapticFeedbackController;
-import com.android.datetimepicker.R;
-import com.android.datetimepicker.Utils;
+import com.android.datetimepicker.*;
 import com.android.datetimepicker.date.SimpleMonthAdapter.CalendarDay;
 
 import java.text.SimpleDateFormat;
@@ -102,6 +101,8 @@ public class DatePickerDialog extends DialogFragment implements
 
     private boolean mDelayAnimation = true;
 
+    private boolean mDarkTheme = false;
+
     // Accessibility strings.
     private String mDayPickerDescription;
     private String mSelectDay;
@@ -144,17 +145,19 @@ public class DatePickerDialog extends DialogFragment implements
      */
     public static DatePickerDialog newInstance(OnDateSetListener callBack, int year,
             int monthOfYear,
-            int dayOfMonth) {
+            int dayOfMonth,
+            boolean darkTheme) {
         DatePickerDialog ret = new DatePickerDialog();
-        ret.initialize(callBack, year, monthOfYear, dayOfMonth);
+        ret.initialize(callBack, year, monthOfYear, dayOfMonth, darkTheme);
         return ret;
     }
 
-    public void initialize(OnDateSetListener callBack, int year, int monthOfYear, int dayOfMonth) {
+    public void initialize(OnDateSetListener callBack, int year, int monthOfYear, int dayOfMonth, boolean darkTheme) {
         mCallBack = callBack;
         mCalendar.set(Calendar.YEAR, year);
         mCalendar.set(Calendar.MONTH, monthOfYear);
         mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        mDarkTheme = darkTheme;
     }
 
     @Override
@@ -267,6 +270,29 @@ public class DatePickerDialog extends DialogFragment implements
         }
 
         mHapticFeedbackController = new HapticFeedbackController(activity);
+
+        int white = res.getColor(R.color.white);
+        int timeDisplay = res.getColor(R.color.numbers_text_color);
+        ColorStateList doneTextColor = res.getColorStateList(R.color.done_text_color);
+        int doneBackground = R.drawable.done_background_color;
+
+        int darkGray = res.getColor(R.color.dark_gray);
+        ColorStateList darkDoneTextColor = res.getColorStateList(R.color.done_text_color_dark);
+        int darkDoneBackground = R.drawable.done_background_color_dark;
+
+        mMonthAndDayView = (LinearLayout) view.findViewById(R.id.date_picker_month_and_day);
+        mSelectedMonthTextView.setTextColor(mDarkTheme? white : timeDisplay);
+        mSelectedDayTextView.setTextColor(mDarkTheme? white : timeDisplay);
+        mYearView.setTextColor(mDarkTheme ? white : timeDisplay);
+        mDoneButton.setTextColor(mDarkTheme ? darkDoneTextColor : doneTextColor);
+        mDoneButton.setBackgroundResource(mDarkTheme? darkDoneBackground : doneBackground);
+        view.findViewById(R.id.date_picker_header).setBackgroundColor(mDarkTheme ? darkGray : res.getColor(R.color.calendar_header));
+        ((TextView) (view.findViewById(R.id.date_picker_header))).setTextColor(mDarkTheme? white : timeDisplay);
+        ((TextView) (view.findViewById(R.id.date_picker_month))).setTextColor(mDarkTheme? white : timeDisplay);
+        ((TextView) (view.findViewById(R.id.date_picker_day))).setTextColor(mDarkTheme? white : timeDisplay);
+        ((AccessibleTextView) (view.findViewById(R.id.date_picker_year))).setTextColor(mDarkTheme? white : timeDisplay);
+        view.findViewById(R.id.day_picker_selected_date_layout).setBackgroundColor(mDarkTheme? darkGray : white);
+        view.findViewById(R.id.animator).setBackgroundColor(mDarkTheme? darkGray : white);
         return view;
     }
 
