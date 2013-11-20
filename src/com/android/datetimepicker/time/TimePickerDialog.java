@@ -94,6 +94,7 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
     private int mInitialMinute;
     private boolean mIs24HourMode;
     private boolean mThemeDark;
+    private String title;
 
     // For hardware IME input.
     private char mPlaceholderText;
@@ -141,6 +142,13 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
         return ret;
     }
 
+    public static TimePickerDialog newInstance(OnTimeSetListener callback,
+                                               int hourOfDay, int minute, boolean is24HourMode, String title) {
+        TimePickerDialog ret = new TimePickerDialog();
+        ret.initialize(callback, hourOfDay, minute, is24HourMode, title);
+        return ret;
+    }
+
     public void initialize(OnTimeSetListener callback,
             int hourOfDay, int minute, boolean is24HourMode) {
         mCallback = callback;
@@ -150,6 +158,18 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
         mIs24HourMode = is24HourMode;
         mInKbMode = false;
         mThemeDark = false;
+    }
+
+    public void initialize(OnTimeSetListener callback,
+                           int hourOfDay, int minute, boolean is24HourMode, String title) {
+        mCallback = callback;
+
+        mInitialHourOfDay = hourOfDay;
+        mInitialMinute = minute;
+        mIs24HourMode = is24HourMode;
+        mInKbMode = false;
+        mThemeDark = false;
+        this.title = title;
     }
 
     /**
@@ -190,7 +210,11 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        if (title == null) {
+            getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        } else {
+            getDialog().setTitle(title);
+        }
 
         View view = inflater.inflate(R.layout.time_picker_dialog, null);
         KeyboardListener keyboardListener = new KeyboardListener();
