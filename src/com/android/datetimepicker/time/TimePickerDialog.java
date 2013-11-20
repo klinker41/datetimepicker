@@ -196,6 +196,10 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (mThemeDark) {
+            setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Holo_Dialog);
+        }
+
         if (savedInstanceState != null && savedInstanceState.containsKey(KEY_HOUR_OF_DAY)
                     && savedInstanceState.containsKey(KEY_MINUTE)
                     && savedInstanceState.containsKey(KEY_IS_24_HOUR_VIEW)) {
@@ -210,6 +214,13 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
+
+        if (mThemeDark) {
+            getDialog().getWindow().setBackgroundDrawableResource(R.color.dark_gray);
+        } else {
+            getDialog().getWindow().setBackgroundDrawableResource(R.color.white);
+        }
+
         if (title == null) {
             getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         } else {
