@@ -286,7 +286,9 @@ public class DatePickerDialog extends DialogFragment implements
         mYearView.setTextColor(mDarkTheme ? white : timeDisplay);
         mDoneButton.setTextColor(mDarkTheme ? darkDoneTextColor : doneTextColor);
         mDoneButton.setBackgroundResource(mDarkTheme? darkDoneBackground : doneBackground);
-        view.findViewById(R.id.date_picker_header).setBackgroundColor(mDarkTheme ? darkGray : res.getColor(R.color.calendar_header));
+        try {
+            view.findViewById(R.id.date_picker_header).setBackgroundColor(mDarkTheme ? darkGray : res.getColor(R.color.calendar_header));
+        } catch (Exception e) { e.printStackTrace(); }
         ((TextView) (view.findViewById(R.id.date_picker_header))).setTextColor(mDarkTheme? white : timeDisplay);
         ((TextView) (view.findViewById(R.id.date_picker_month))).setTextColor(mDarkTheme? white : timeDisplay);
         ((TextView) (view.findViewById(R.id.date_picker_day))).setTextColor(mDarkTheme? white : timeDisplay);
