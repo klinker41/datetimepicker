@@ -288,13 +288,13 @@ public class DatePickerDialog extends DialogFragment implements
         mDoneButton.setBackgroundResource(mDarkTheme? darkDoneBackground : doneBackground);
         try {
             view.findViewById(R.id.date_picker_header).setBackgroundColor(mDarkTheme ? darkGray : res.getColor(R.color.calendar_header));
+            ((TextView) (view.findViewById(R.id.date_picker_header))).setTextColor(mDarkTheme? white : timeDisplay);
+            ((TextView) (view.findViewById(R.id.date_picker_month))).setTextColor(mDarkTheme? white : timeDisplay);
+            ((TextView) (view.findViewById(R.id.date_picker_day))).setTextColor(mDarkTheme? white : timeDisplay);
+            ((AccessibleTextView) (view.findViewById(R.id.date_picker_year))).setTextColor(mDarkTheme? white : timeDisplay);
+            view.findViewById(R.id.day_picker_selected_date_layout).setBackgroundColor(mDarkTheme? darkGray : white);
+            view.findViewById(R.id.animator).setBackgroundColor(mDarkTheme? darkGray : white);
         } catch (Exception e) { e.printStackTrace(); }
-        ((TextView) (view.findViewById(R.id.date_picker_header))).setTextColor(mDarkTheme? white : timeDisplay);
-        ((TextView) (view.findViewById(R.id.date_picker_month))).setTextColor(mDarkTheme? white : timeDisplay);
-        ((TextView) (view.findViewById(R.id.date_picker_day))).setTextColor(mDarkTheme? white : timeDisplay);
-        ((AccessibleTextView) (view.findViewById(R.id.date_picker_year))).setTextColor(mDarkTheme? white : timeDisplay);
-        view.findViewById(R.id.day_picker_selected_date_layout).setBackgroundColor(mDarkTheme? darkGray : white);
-        view.findViewById(R.id.animator).setBackgroundColor(mDarkTheme? darkGray : white);
         return view;
     }
 
